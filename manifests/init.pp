@@ -1,10 +1,52 @@
-# == Class: facter
+# @summary Manage facter
 #
-# Manage facter
+# This class will manage facter and allow you to specify external facts.
+#
+# @param manage_facts_d_dir
+#   Boolean to determine if the external facts directory will be managed.
+#
+# @param purge_facts_d
+#   Boolean to determine if the external facts directory should be purged. This
+#   will remove files not managed by Puppet.
+#
+# @param facts_d_dir
+#   Path to the directory which will contain the external facts.
+#
+# @param facts_d_owner
+#   The owner of the `facts_d_dir`.
+#
+# @param facts_d_group
+#   The group of the `facts_d_dir`.
+#
+# @param facts_d_mode
+#   The mode of the `facts_d_dir`.
+#
+# @param path_to_facter
+#   The path to the facter binary.
+#
+# @param path_to_facter_symlink
+#   Path to a symlink that points to the facter binary.
+#
+# @param ensure_facter_symlink
+#   Boolean to determine if the symlink should be present.
+#
+# @param facts_hash
+#   A hash of `facter::fact` entries.
+#
+# @param facts_file
+#   The file in which the text based external facts are stored. This file must
+#   end with '.txt'.
+#
+# @param facts_file_owner
+#   The owner of the facts_file.
+#
+# @param facts_file_group
+#   The group of the facts_file.
+#
+# @param facts_file_mode
+#   The mode of the facts_file.
 #
 class facter (
-  String[1]                  $package_name           = 'facter',
-  String[1]                  $package_ensure         = 'present',
   Boolean                    $manage_facts_d_dir     = true,
   Boolean                    $purge_facts_d          = false,
   Stdlib::Absolutepath       $facts_d_dir            = '/etc/facter/facts.d',
@@ -15,7 +57,6 @@ class facter (
   Stdlib::Absolutepath       $path_to_facter_symlink = '/usr/local/bin/facter',
   Boolean                    $ensure_facter_symlink  = false,
   Hash                       $facts_hash             = {},
-  Hash                       $facts_hash_hiera_merge = false,
   Pattern[/\.txt*\Z/]        $facts_file             = 'facts.txt',
   String[1]                  $facts_file_owner       = 'root',
   String[1]                  $facts_file_group       = 'root',
