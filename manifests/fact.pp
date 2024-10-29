@@ -20,7 +20,6 @@ define facter::fact (
   Optional[String[1]] $file = undef,
   Optional[Stdlib::Absolutepath] $facts_dir = undef,
 ) {
-
   include facter
 
   $facts_file = pick($file, $facter::facts_file)

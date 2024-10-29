@@ -15,7 +15,6 @@ define facter::structured_data_fact (
   Pattern[/\.yaml*\Z/] $file = 'facts.yaml',
   Optional[Stdlib::Absolutepath] $facts_dir = undef,
 ) {
-
   include facter
 
   $facts_dir_path = pick($facts_dir, $facter::facts_d_dir)

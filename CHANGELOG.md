@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.1 - 2024-10-25
+
+  - Updated metadata information
+  - Update PDK
+  - Added parameter definitions
+  - Fixed most ruby lint errors
+
 ## [v4.0.0](https://github.com/ghoneycutt/puppet-module-facter/tree/v4.0.0) (2022-05-02)
 
 [Full Changelog](https://github.com/ghoneycutt/puppet-module-facter/compare/v3.5.0...v4.0.0)

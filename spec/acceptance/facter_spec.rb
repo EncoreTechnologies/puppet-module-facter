@@ -42,51 +42,51 @@ describe 'facter class' do
         end
 
         describe command("PsExec -accepteula -s 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat' apply --debug #{manifest}") do
-          its(:stderr) { should contain('with error code 0') }
+          its(:stderr) { is_expected.to contain('with error code 0') }
         end
 
         describe command("PsExec -accepteula -s 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat' apply --debug #{manifest}") do
-          its(:stderr) { should contain('with error code 0') }
+          its(:stderr) { is_expected.to contain('with error code 0') }
         end
       else
-        it 'should work with no errors' do
+        it 'is expected to work with no errors' do
           # Run it twice and test for idempotency
-          apply_manifest(pp, :catch_failures => true)
-          apply_manifest(pp, :catch_changes  => true)
+          apply_manifest(pp, Hash['catch_failures', true])
+          apply_manifest(pp, Hash['catch_changes', true])
         end
       end
     end
 
     context 'should contain resources' do
       describe file(facts_d_dir) do
-        it { should be_directory }
-        it { should be_owned_by facts_d_owner }
+        it { is_expected.to be_directory }
+        it { is_expected.to be_owned_by facts_d_owner }
         # Serverspec (more specifically
         # Specinfra::Command::Windows::Base::File) does not support group, mode
         # or size for files on Windows.
         if host_inventory['platform'] != 'windows'
-          it { should be_grouped_into facts_d_group }
-          it { should be_mode facts_d_mode }
+          it { is_expected.to be_grouped_into facts_d_group }
+          it { is_expected.to be_mode facts_d_mode }
         end
       end
 
       describe file(facts_file) do
-        it { should be_file }
-        it { should be_owned_by facts_file_owner }
+        it { is_expected.to be_file }
+        it { is_expected.to be_owned_by facts_file_owner }
         # Serverspec (more specifically
         # Specinfra::Command::Windows::Base::File) does not support group, mode
         # or size for files on Windows.
         if host_inventory['platform'] != 'windows'
-          it { should be_grouped_into facts_file_group }
-          it { should be_mode facts_file_mode }
-          its(:size) { should eq 38 }
+          it { is_expected.to be_grouped_into facts_file_group }
+          it { is_expected.to be_mode facts_file_mode }
+          its(:size) { is_expected.to eq 38 }
         end
       end
     end
   end
 
   context 'with specifying facts_hash' do
-    context 'should apply the manifest' do
+    context 'is expected to apply the manifest' do
       pp = <<-EOS
       class { 'facter':
         facts_hash => {
@@ -108,28 +108,28 @@ describe 'facter class' do
         end
 
         describe command("PsExec -accepteula -s 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat' apply --debug #{manifest}") do
-          its(:stderr) { should contain('with error code 0') }
+          its(:stderr) { is_expected.to contain('with error code 0') }
         end
       else
-        it 'should work with no errors' do
-          apply_manifest(pp, :catch_failures => true)
+        it 'is expected to work with no errors' do
+          apply_manifest(pp, Hash['catch_failures', true])
         end
       end
     end
 
-    context 'and should contain facts' do
+    context 'and is expected to contain facts' do
       describe file(test_facts_file) do
-        its(:content) { should match %r{test_fact=test_value} }
+        its(:content) { is_expected.to match %r{test_fact=test_value} }
       end
 
       describe command('facter -p test_fact') do
-        its(:stdout) { should contain('test_value') }
+        its(:stdout) { is_expected.to contain('test_value') }
       end
     end
   end
 
   context 'purges unmanaged facts' do
-    context 'should apply the manifest' do
+    context 'is expected to apply the manifest' do
       setup_pp = <<-EOS
       class { 'facter':
         facts_hash => {
@@ -163,31 +163,31 @@ describe 'facter class' do
         end
 
         describe command("PsExec -accepteula -s 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat' apply --debug #{setup_manifest}") do
-          its(:stderr) { should contain('with error code 0') }
+          its(:stderr) { is_expected.to contain('with error code 0') }
         end
         describe command("PsExec -accepteula -s 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat' apply --debug #{manifest}") do
-          its(:stderr) { should contain('with error code 0') }
+          its(:stderr) { is_expected.to contain('with error code 0') }
         end
       else
-        it 'should work with no errors' do
-          apply_manifest(setup_pp, :catch_failures => true)
-          apply_manifest(pp, :catch_failures => true)
+        it 'is expected to work with no errors' do
+          apply_manifest(setup_pp, Hash['catch_failures', true])
+          apply_manifest(pp, Hash['catch_failures', true])
         end
       end
     end
 
-    context 'and should remove facts not managed by puppet' do
+    context 'and is expected to remove facts not managed by puppet' do
       describe file(facts_file) do
-        its(:content) { should_not match %r{test1_fact=.*} }
+        its(:content) { is_expected.not_to match %r{test1_fact=.*} }
       end
       describe file(facts_file) do
-        its(:content) { should match %r{test2_fact=.*} }
+        its(:content) { is_expected.to match %r{test2_fact=.*} }
       end
     end
   end
 
   context 'with using facter::structured_data_fact' do
-    context 'should apply the manifest' do
+    context 'is expected to apply the manifest' do
       pp = <<-EOS
       facter::structured_data_fact { 'test':
         data => {
@@ -210,26 +210,26 @@ describe 'facter class' do
         end
 
         describe command("PsExec -accepteula -s 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat' apply --debug #{manifest}") do
-          its(:stderr) { should contain('with error code 0') }
+          its(:stderr) { is_expected.to contain('with error code 0') }
         end
       else
-        it 'should work with no errors' do
-          apply_manifest(pp, :catch_failures => true)
+        it 'is expected to work with no errors' do
+          apply_manifest(pp, Hash['catch_failures', true])
         end
       end
     end
 
-    context 'and should contain facts' do
+    context 'and is expected to contain facts' do
       describe file(test_yaml_file) do
-        it { should exist }
+        it { is_expected.to exist }
       end
 
       describe command('puppet facts my_hash.a') do
-        its(:stdout) { should contain('1') }
+        its(:stdout) { is_expected.to contain('1') }
       end
 
       describe command('puppet facts my_hash.b') do
-        its(:stdout) { should contain('2') }
+        its(:stdout) { is_expected.to contain('2') }
       end
     end
   end
@@ -239,24 +239,24 @@ describe 'facter class' do
       before { skip('Windows does not have symlinks. Skipping test.') }
     end
 
-    it 'should apply the manifest' do
+    it 'is expected to apply the manifest' do
       pp = <<-EOS
       class { 'facter':
         ensure_facter_symlink => true,
       }
       EOS
 
-      apply_manifest(pp, :catch_failures => true)
+      apply_manifest(pp, Hash['catch_failures', true])
     end
 
     context 'and should have the symlink' do
       describe file('/usr/local/bin/facter') do
-        it { should be_symlink }
-        it { should be_linked_to '/opt/puppetlabs/bin/facter' }
+        it { is_expected.to be_symlink }
+        it { is_expected.to be_linked_to '/opt/puppetlabs/bin/facter' }
       end
 
       describe command('/usr/local/bin/facter -p test_fact') do
-        its(:stdout) { should contain('test_value') }
+        its(:stdout) { is_expected.to contain('test_value') }
       end
     end
   end
@@ -279,22 +279,22 @@ describe 'facter class' do
         end
 
         describe command("PsExec -accepteula -s 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat' apply --debug #{manifest}") do
-          its(:stderr) { should contain('with error code 0') }
+          its(:stderr) { is_expected.to contain('with error code 0') }
         end
       else
-        it 'should work with no errors' do
-          apply_manifest(pp, :catch_failures => true)
+        it 'is expected to work with no errors' do
+          apply_manifest(pp, Hash['catch_failures', true])
         end
       end
     end
 
-    context 'and should remove facts not managed by puppet' do
+    context 'and is expected to remove facts not managed by puppet' do
       describe file(test_facts_file) do
-        it { should_not exist }
+        it { is_expected.to exist }
       end
 
       describe command('facter -p test_fact') do
-        its(:stdout) { should_not contain('test_value') }
+        its(:stdout) { is_expected.to contain('test_value') }
       end
     end
   end
