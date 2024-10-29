@@ -23,6 +23,8 @@
 #   Boolean to determine if the symlink should be present.
 # @param facts_hash
 #   A hash of `facter::fact` entries.
+# @param structured_data_facts_hash
+#   A hash of `facter::structured_data_fact` entries.
 # @param facts_file
 #   The file in which the text based external facts are stored. This file must
 #   end with '.txt'.
@@ -34,26 +36,45 @@
 #   The mode of the facts_file.
 #
 class facter (
-  Boolean                    $manage_facts_d_dir     = true,
-  Boolean                    $purge_facts_d          = false,
-  Stdlib::Absolutepath       $facts_d_dir            = '/etc/facter/facts.d',
-  String[1]                  $facts_d_owner          = 'root',
-  String[1]                  $facts_d_group          = 'root',
-  Stdlib::Filemode           $facts_d_mode           = '0755',
-  Stdlib::Absolutepath       $path_to_facter         = '/usr/bin/facter',
-  Stdlib::Absolutepath       $path_to_facter_symlink = '/usr/local/bin/facter',
-  Boolean                    $ensure_facter_symlink  = false,
-  Hash                       $facts_hash             = {},
-  Pattern[/\.txt*\Z/]        $facts_file             = 'facts.txt',
-  String[1]                  $facts_file_owner       = 'root',
-  String[1]                  $facts_file_group       = 'root',
-  Stdlib::Filemode           $facts_file_mode        = '0644',
+  Boolean               $manage_facts_d_dir         = true,
+  Boolean               $purge_facts_d              = false,
+  Stdlib::Absolutepath  $facts_d_dir                = '/etc/facter/facts.d',
+  String[1]             $facts_d_owner              = 'root',
+  String[1]             $facts_d_group              = 'root',
+  Stdlib::Filemode      $facts_d_mode               = '0755',
+  Stdlib::Absolutepath  $path_to_facter             = '/opt/puppetlabs/bin/facter',
+  Stdlib::Absolutepath  $path_to_facter_symlink     = '/usr/local/bin/facter',
+  Boolean               $ensure_facter_symlink      = false,
+  Hash                  $facts_hash                 = {},
+  Hash                  $structured_data_facts_hash = {},
+  Pattern[/\.txt*\Z/]   $facts_file                 = 'facts.txt',
+  String[1]             $facts_file_owner           = 'root',
+  String[1]             $facts_file_group           = 'root',
+  Stdlib::Filemode      $facts_file_mode            = '0644',
 ) {
+  if $facts['os']['family'] == 'windows' {
+    $facts_file_path  = "${facts_d_dir}\\${facts_file}"
+    $facts_d_mode_real = undef
+    $facts_file_mode_real = undef
+  } else {
+    $facts_file_path  = "${facts_d_dir}/${facts_file}"
+    $facts_d_mode_real = $facts_d_mode
+    $facts_file_mode_real = $facts_file_mode
+  }
+
   if $manage_facts_d_dir == true {
-    exec { "mkdir_p-${facts_d_dir}":
-      command => "mkdir -p ${facts_d_dir}",
-      unless  => "test -d ${facts_d_dir}",
-      path    => '/bin:/usr/bin',
+    if $facts['os']['family'] == 'windows' {
+      exec { "mkdir_p-${facts_d_dir}":
+        command => "cmd /c mkdir ${facts_d_dir}",
+        creates => $facts_d_dir,
+        path    => $facts['path'],
+      }
+    } else {
+      exec { "mkdir_p-${facts_d_dir}":
+        command => "mkdir -p ${facts_d_dir}",
+        creates => $facts_d_dir,
+        path    => '/bin:/usr/bin',
+      }
     }
 
     file { 'facts_d_directory':
@@ -61,10 +82,11 @@ class facter (
       path    => $facts_d_dir,
       owner   => $facts_d_owner,
       group   => $facts_d_group,
-      mode    => $facts_d_mode,
+      mode    => $facts_d_mode_real,
       purge   => $purge_facts_d,
       recurse => $purge_facts_d,
       require => Exec["mkdir_p-${facts_d_dir}"],
+      before  => Concat['facts_file'],
     }
   }
 
@@ -77,19 +99,35 @@ class facter (
     }
   }
 
-  file { 'facts_file':
-    ensure => file,
-    path   => "${facts_d_dir}/${facts_file}",
-    owner  => $facts_file_owner,
-    group  => $facts_file_group,
-    mode   => $facts_file_mode,
+  concat { 'facts_file':
+    ensure         => 'present',
+    path           => $facts_file_path,
+    owner          => $facts_file_owner,
+    group          => $facts_file_group,
+    mode           => $facts_file_mode_real,
+    ensure_newline => true,
+  }
+  # One fragment must exist in order for contents to be managed
+  concat::fragment { 'facts_file-header':
+    target  => 'facts_file',
+    content => "# File managed by Puppet\n#DO NOT EDIT",
+    order   => '00',
   }
 
-  if ! empty( $facts_hash ) {
-    $facts_defaults = {
-      'file'      => $facts_file,
-      'facts_dir' => $facts_d_dir,
+  $facts_defaults = {
+    'file'      => $facts_file,
+    'facts_dir' => $facts_d_dir,
+  }
+
+  $facts_hash.each |$k, $v| {
+    facter::fact { $k:
+      * => $v,
     }
-    create_resources('facter::fact', $facts_hash, $facts_defaults)
+  }
+
+  $structured_data_facts_hash.each |$k, $v| {
+    facter::structured_data_fact { $k:
+      * => $v,
+    }
   }
 }
