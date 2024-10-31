@@ -30,8 +30,6 @@ define facter::fact (
     $facts_file_path = "${facts_dir_path}/${facts_file}"
   }
 
-  $match = "^${name}=\\S.*$"
-
   if $facts_file != $facter::facts_file {
     $concat_target = "facts_file_${name}"
     concat { "facts_file_${name}":
@@ -48,5 +46,6 @@ define facter::fact (
   concat::fragment { "fact_line_${name}":
     target  => $concat_target,
     content => "${name}=${value}",
+    order   => '10',  # Ensure the order is set to avoid conflicts
   }
 }
