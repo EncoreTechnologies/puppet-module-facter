@@ -100,11 +100,12 @@ class facter (
   }
 
   concat { 'facts_file':
-    ensure => 'present',
-    path   => $facts_file_path,
-    owner  => $facts_file_owner,
-    group  => $facts_file_group,
-    mode   => $facts_file_mode_real,
+    ensure         => 'present',
+    path           => $facts_file_path,
+    owner          => $facts_file_owner,
+    group          => $facts_file_group,
+    mode           => $facts_file_mode_real,
+    ensure_newline => true,
   }
   # One fragment must exist in order for contents to be managed
   concat::fragment { 'facts_file-header':
