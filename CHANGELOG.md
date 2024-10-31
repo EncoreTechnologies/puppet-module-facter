@@ -1,3 +1,6 @@
+### v3.6.0 - 2024-10-31
+  PDK Updates and Validation
+
 ### v3.5.0 - 2019-01-03
   Support Puppet v6
 

@@ -52,7 +52,7 @@ class facter (
   Stdlib::Absolutepath       $facts_d_dir            = '/etc/facter/facts.d',
   String[1]                  $facts_d_owner          = 'root',
   String[1]                  $facts_d_group          = 'root',
-  Optional[Stdlib::Filemode] $facts_d_mode           = '0755',
+  Stdlib::Filemode           $facts_d_mode           = '0755',
   Stdlib::Absolutepath       $path_to_facter         = '/usr/bin/facter',
   Stdlib::Absolutepath       $path_to_facter_symlink = '/usr/local/bin/facter',
   Boolean                    $ensure_facter_symlink  = false,
@@ -60,7 +60,7 @@ class facter (
   Pattern[/\.txt*\Z/]        $facts_file             = 'facts.txt',
   String[1]                  $facts_file_owner       = 'root',
   String[1]                  $facts_file_group       = 'root',
-  Optional[Stdlib::Filemode] $facts_file_mode        = '0644',
+  Stdlib::Filemode           $facts_file_mode        = '0644',
 ) {
   if $manage_facts_d_dir == true {
     exec { "mkdir_p-${facts_d_dir}":
